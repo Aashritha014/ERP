@@ -10,6 +10,7 @@ export const usersTable = pgTable("users", {
   role: text("role").notNull().default("student"),
   studentId: integer("student_id"),
   facultyId: integer("faculty_id"),
+  admissionId: integer("admission_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

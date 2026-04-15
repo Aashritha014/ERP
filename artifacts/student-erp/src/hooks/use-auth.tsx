@@ -59,6 +59,7 @@ export const ProtectedRoute = ({ children, allowedRoles }: { children: ReactNode
       if (user.role === 'admin') setLocation("/admin/dashboard");
       else if (user.role === 'student') setLocation("/student/dashboard");
       else if (user.role === 'faculty') setLocation("/faculty/dashboard");
+      else if (user.role === 'applicant') setLocation("/applicant/status");
       else setLocation("/");
     }
   }, [user, isLoading, setLocation, allowedRoles]);

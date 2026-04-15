@@ -128,11 +128,11 @@ paths:
               $ref: "#/components/schemas/CreateAdmissionBody"
       responses:
         "201":
-          description: Admission created
+          description: Admission created with temporary login credentials
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Admission"
+                $ref: "#/components/schemas/AdmissionCreatedResponse"
 
   /admissions/{id}:
     get:
@@ -594,14 +594,37 @@ components:
           type: string
         role:
           type: string
-          enum: [student, admin, faculty]
+          enum: [student, admin, faculty, applicant]
         studentId:
           type: integer
           nullable: true
         facultyId:
           type: integer
           nullable: true
+        admissionId:
+          type: integer
+          nullable: true
       required: [id, name, email, role]
+
+    TemporaryCredentials:
+      type: object
+      properties:
+        email:
+          type: string
+        temporaryPassword:
+          type: string
+        note:
+          type: string
+      required: [email, temporaryPassword, note]
+
+    AdmissionCreatedResponse:
+      type: object
+      properties:
+        admission:
+          $ref: "#/components/schemas/Admission"
+        credentials:
+          $ref: "#/components/schemas/TemporaryCredentials"
+      required: [admission, credentials]
 
     Admission:
       type: object

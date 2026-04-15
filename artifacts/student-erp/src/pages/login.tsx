@@ -34,6 +34,7 @@ export default function Login() {
     if (user.role === 'admin') setLocation("/admin/dashboard");
     else if (user.role === 'student') setLocation("/student/dashboard");
     else if (user.role === 'faculty') setLocation("/faculty/dashboard");
+    else if (user.role === 'applicant') setLocation("/applicant/status");
   }
 
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -51,6 +52,7 @@ export default function Login() {
       if (res.user.role === 'admin') setLocation("/admin/dashboard");
       else if (res.user.role === 'student') setLocation("/student/dashboard");
       else if (res.user.role === 'faculty') setLocation("/faculty/dashboard");
+      else if (res.user.role === 'applicant') setLocation("/applicant/status");
       
       // Reload window to update auth state cleanly
       window.location.reload();

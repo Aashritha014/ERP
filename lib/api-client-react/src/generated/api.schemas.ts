@@ -29,6 +29,7 @@ export const UserSessionRole = {
   student: "student",
   admin: "admin",
   faculty: "faculty",
+  applicant: "applicant",
 } as const;
 
 export interface UserSession {
@@ -38,11 +39,18 @@ export interface UserSession {
   role: UserSessionRole;
   studentId?: number | null;
   facultyId?: number | null;
+  admissionId?: number | null;
 }
 
 export interface LoginResponse {
   user: UserSession;
   token?: string;
+}
+
+export interface TemporaryCredentials {
+  email: string;
+  temporaryPassword: string;
+  note: string;
 }
 
 export type AdmissionGender =
@@ -79,6 +87,11 @@ export interface Admission {
   remarks?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface AdmissionCreatedResponse {
+  admission: Admission;
+  credentials: TemporaryCredentials;
 }
 
 export type CreateAdmissionBodyGender =

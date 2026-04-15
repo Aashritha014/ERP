@@ -8,6 +8,7 @@ import NotFound from "@/pages/not-found";
 // Public Pages
 import Login from "@/pages/login";
 import Apply from "@/pages/apply";
+import ApplicantStatus from "@/pages/applicant/status";
 
 // Student Pages
 import StudentDashboard from "@/pages/student/dashboard";
@@ -41,6 +42,11 @@ function Router() {
       <Route path="/apply" component={Apply} />
       <Route path="/">
         <Redirect to="/login" />
+      </Route>
+
+      {/* Applicant Routes */}
+      <Route path="/applicant/status">
+        <ProtectedRoute allowedRoles={['applicant']}><ApplicantStatus /></ProtectedRoute>
       </Route>
 
       {/* Student Routes */}

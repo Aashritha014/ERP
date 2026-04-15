@@ -37,7 +37,27 @@ router.post("/admissions", async (req, res): Promise<void> => {
     })
     .returning();
 
-  res.status(201).json(formatAdmission(admission));
+  const temporaryPassword = `APP${admission.id}${Math.floor(1000 + Math.random() * 9000)}`;
+
+  await db
+    .insert(usersTable)
+    .values({
+      name: admission.name,
+      email: admission.email,
+      password: temporaryPassword,
+      role: "applicant",
+      admissionId: admission.id,
+    })
+    .onConflictDoNothing();
+
+  res.status(201).json({
+    admission: formatAdmission(admission),
+    credentials: {
+      email: admission.email,
+      temporaryPassword,
+      note: "Use these credentials to log in and track your application status. Save them securely — they will not be shown again.",
+    },
+  });
 });
 
 router.get("/admissions/:id", async (req, res): Promise<void> => {

@@ -13,4 +13,5 @@ export const UserSessionRole = {
   student: "student",
   admin: "admin",
   faculty: "faculty",
+  applicant: "applicant",
 } as const;

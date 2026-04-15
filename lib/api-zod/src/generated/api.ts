@@ -27,9 +27,10 @@ export const LoginResponse = zod.object({
     id: zod.number(),
     name: zod.string(),
     email: zod.string(),
-    role: zod.enum(["student", "admin", "faculty"]),
+    role: zod.enum(["student", "admin", "faculty", "applicant"]),
     studentId: zod.number().nullish(),
     facultyId: zod.number().nullish(),
+    admissionId: zod.number().nullish(),
   }),
   token: zod.string().optional(),
 });
@@ -48,9 +49,10 @@ export const GetMeResponse = zod.object({
   id: zod.number(),
   name: zod.string(),
   email: zod.string(),
-  role: zod.enum(["student", "admin", "faculty"]),
+  role: zod.enum(["student", "admin", "faculty", "applicant"]),
   studentId: zod.number().nullish(),
   facultyId: zod.number().nullish(),
+  admissionId: zod.number().nullish(),
 });
 
 /**

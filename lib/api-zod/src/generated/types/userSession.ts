@@ -14,4 +14,5 @@ export interface UserSession {
   role: UserSessionRole;
   studentId?: number | null;
   facultyId?: number | null;
+  admissionId?: number | null;
 }

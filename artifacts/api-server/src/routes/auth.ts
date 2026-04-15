@@ -27,6 +27,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     role: user.role,
     studentId: user.studentId ?? null,
     facultyId: user.facultyId ?? null,
+    admissionId: user.admissionId ?? null,
   };
 
   (req as any).session = session;

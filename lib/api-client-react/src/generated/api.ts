@@ -19,6 +19,7 @@ import type {
 import type {
   AdminDashboard,
   Admission,
+  AdmissionCreatedResponse,
   CreateAdmissionBody,
   CreateExamResultBody,
   CreateFeeRecordBody,
@@ -467,8 +468,8 @@ export const getCreateAdmissionUrl = () => {
 export const createAdmission = async (
   createAdmissionBody: CreateAdmissionBody,
   options?: RequestInit,
-): Promise<Admission> => {
-  return customFetch<Admission>(getCreateAdmissionUrl(), {
+): Promise<AdmissionCreatedResponse> => {
+  return customFetch<AdmissionCreatedResponse>(getCreateAdmissionUrl(), {
     ...options,
     method: "POST",
     headers: { "Content-Type": "application/json", ...options?.headers },
