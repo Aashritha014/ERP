@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Student ERP System"
+version = "1.0.0"
+id = "artifacts/student-erp"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23289
+
+[services.development]
+run = "pnpm --filter @workspace/student-erp run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/student-erp", "run", "build" ]
+publicDir = "artifacts/student-erp/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23289"
+BASE_PATH = "/"

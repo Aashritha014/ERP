@@ -1,22 +1,36 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Student ERP System API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: admissions
+    description: Admission management
+  - name: students
+    description: Student database
+  - name: fees
+    description: Fee management
+  - name: hostel
+    description: Hostel management
+  - name: exams
+    description: Examination records
+  - name: faculty
+    description: Faculty management
+  - name: dashboard
+    description: Dashboard analytics
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +38,510 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout user
+      responses:
+        "200":
+          description: Logged out successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user session
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSession"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /admissions:
+    get:
+      operationId: listAdmissions
+      tags: [admissions]
+      summary: List all admission applications
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, rejected]
+      responses:
+        "200":
+          description: List of admissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Admission"
+    post:
+      operationId: createAdmission
+      tags: [admissions]
+      summary: Submit a new admission application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAdmissionBody"
+      responses:
+        "201":
+          description: Admission created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admission"
+
+  /admissions/{id}:
+    get:
+      operationId: getAdmission
+      tags: [admissions]
+      summary: Get a single admission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Admission details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admission"
+    patch:
+      operationId: updateAdmissionStatus
+      tags: [admissions]
+      summary: Approve or reject an admission (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAdmissionStatusBody"
+      responses:
+        "200":
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Admission"
+
+  /students:
+    get:
+      operationId: listStudents
+      tags: [students]
+      summary: List all students
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: department
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Student"
+
+  /students/{id}:
+    get:
+      operationId: getStudent
+      tags: [students]
+      summary: Get a single student by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Student details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+    patch:
+      operationId: updateStudent
+      tags: [students]
+      summary: Update student details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStudentBody"
+      responses:
+        "200":
+          description: Student updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+
+  /fees:
+    get:
+      operationId: listFees
+      tags: [fees]
+      summary: List fee records
+      parameters:
+        - name: studentId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [paid, pending, overdue]
+      responses:
+        "200":
+          description: Fee records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeeRecord"
+    post:
+      operationId: createFeeRecord
+      tags: [fees]
+      summary: Create a fee record (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFeeRecordBody"
+      responses:
+        "201":
+          description: Fee record created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeRecord"
+
+  /fees/{id}:
+    get:
+      operationId: getFeeRecord
+      tags: [fees]
+      summary: Get a fee record with receipt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Fee record details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeRecord"
+    patch:
+      operationId: updateFeeRecord
+      tags: [fees]
+      summary: Update fee payment status (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFeeRecordBody"
+      responses:
+        "200":
+          description: Fee record updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeeRecord"
+
+  /hostel/rooms:
+    get:
+      operationId: listHostelRooms
+      tags: [hostel]
+      summary: List all hostel rooms
+      parameters:
+        - name: available
+          in: query
+          schema:
+            type: boolean
+        - name: block
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of rooms
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HostelRoom"
+
+  /hostel/allocations:
+    get:
+      operationId: listHostelAllocations
+      tags: [hostel]
+      summary: List hostel allocations
+      parameters:
+        - name: studentId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Hostel allocations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HostelAllocation"
+    post:
+      operationId: createHostelAllocation
+      tags: [hostel]
+      summary: Allocate a room to a student (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateHostelAllocationBody"
+      responses:
+        "201":
+          description: Allocation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HostelAllocation"
+
+  /hostel/allocations/{id}:
+    delete:
+      operationId: deleteHostelAllocation
+      tags: [hostel]
+      summary: Remove a hostel allocation (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Allocation removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /exams/results:
+    get:
+      operationId: listExamResults
+      tags: [exams]
+      summary: List examination results
+      parameters:
+        - name: studentId
+          in: query
+          schema:
+            type: integer
+        - name: semester
+          in: query
+          schema:
+            type: string
+        - name: subject
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Exam results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExamResult"
+    post:
+      operationId: createExamResult
+      tags: [exams]
+      summary: Add an exam result (faculty only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateExamResultBody"
+      responses:
+        "201":
+          description: Exam result added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamResult"
+
+  /exams/results/{id}:
+    patch:
+      operationId: updateExamResult
+      tags: [exams]
+      summary: Update an exam result (faculty only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateExamResultBody"
+      responses:
+        "200":
+          description: Result updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamResult"
+
+  /faculty:
+    get:
+      operationId: listFaculty
+      tags: [faculty]
+      summary: List all faculty members
+      responses:
+        "200":
+          description: Faculty list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Faculty"
+
+  /dashboard/admin:
+    get:
+      operationId: getAdminDashboard
+      tags: [dashboard]
+      summary: Get admin dashboard summary statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminDashboard"
+
+  /dashboard/student/{studentId}:
+    get:
+      operationId: getStudentDashboard
+      tags: [dashboard]
+      summary: Get student dashboard data
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Student dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentDashboard"
+
+  /dashboard/faculty/{facultyId}:
+    get:
+      operationId: getFacultyDashboard
+      tags: [dashboard]
+      summary: Get faculty dashboard data
+      parameters:
+        - name: facultyId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Faculty dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FacultyDashboard"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +549,489 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required: [email, password]
+
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserSession"
+        token:
+          type: string
+      required: [user]
+
+    UserSession:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [student, admin, faculty]
+        studentId:
+          type: integer
+          nullable: true
+        facultyId:
+          type: integer
+          nullable: true
+      required: [id, name, email, role]
+
+    Admission:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        dateOfBirth:
+          type: string
+        gender:
+          type: string
+          enum: [male, female, other]
+        address:
+          type: string
+        course:
+          type: string
+        department:
+          type: string
+        previousSchool:
+          type: string
+        previousMarks:
+          type: number
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        remarks:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required: [id, name, email, phone, dateOfBirth, gender, address, course, department, previousSchool, previousMarks, status, createdAt, updatedAt]
+
+    CreateAdmissionBody:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        dateOfBirth:
+          type: string
+        gender:
+          type: string
+          enum: [male, female, other]
+        address:
+          type: string
+        course:
+          type: string
+        department:
+          type: string
+        previousSchool:
+          type: string
+        previousMarks:
+          type: number
+      required: [name, email, phone, dateOfBirth, gender, address, course, department, previousSchool, previousMarks]
+
+    UpdateAdmissionStatusBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [approved, rejected]
+        remarks:
+          type: string
+      required: [status]
+
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+        studentUid:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        dateOfBirth:
+          type: string
+        gender:
+          type: string
+        address:
+          type: string
+        course:
+          type: string
+        department:
+          type: string
+        semester:
+          type: string
+        rollNumber:
+          type: string
+        enrollmentYear:
+          type: integer
+        admissionId:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, studentUid, name, email, phone, dateOfBirth, gender, address, course, department, semester, rollNumber, enrollmentYear, createdAt]
+
+    UpdateStudentBody:
+      type: object
+      properties:
+        phone:
+          type: string
+        address:
+          type: string
+        semester:
+          type: string
+
+    FeeRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        studentId:
+          type: integer
+        studentName:
+          type: string
+        studentUid:
+          type: string
+        feeType:
+          type: string
+          enum: [tuition, hostel, exam, library, other]
+        amount:
+          type: number
+        dueDate:
+          type: string
+        paidDate:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [paid, pending, overdue]
+        receiptNumber:
+          type: string
+          nullable: true
+        semester:
+          type: string
+        academicYear:
+          type: string
+        createdAt:
+          type: string
+      required: [id, studentId, studentName, studentUid, feeType, amount, dueDate, status, semester, academicYear, createdAt]
+
+    CreateFeeRecordBody:
+      type: object
+      properties:
+        studentId:
+          type: integer
+        feeType:
+          type: string
+          enum: [tuition, hostel, exam, library, other]
+        amount:
+          type: number
+        dueDate:
+          type: string
+        semester:
+          type: string
+        academicYear:
+          type: string
+      required: [studentId, feeType, amount, dueDate, semester, academicYear]
+
+    UpdateFeeRecordBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [paid, pending, overdue]
+        paidDate:
+          type: string
+
+    HostelRoom:
+      type: object
+      properties:
+        id:
+          type: integer
+        roomNumber:
+          type: string
+        block:
+          type: string
+        floor:
+          type: integer
+        capacity:
+          type: integer
+        occupied:
+          type: integer
+        type:
+          type: string
+          enum: [single, double, triple]
+        amenities:
+          type: array
+          items:
+            type: string
+        available:
+          type: boolean
+      required: [id, roomNumber, block, floor, capacity, occupied, type, amenities, available]
+
+    HostelAllocation:
+      type: object
+      properties:
+        id:
+          type: integer
+        studentId:
+          type: integer
+        studentName:
+          type: string
+        studentUid:
+          type: string
+        roomId:
+          type: integer
+        roomNumber:
+          type: string
+        block:
+          type: string
+        floor:
+          type: integer
+        allocatedDate:
+          type: string
+        vacatedDate:
+          type: string
+          nullable: true
+        active:
+          type: boolean
+      required: [id, studentId, studentName, studentUid, roomId, roomNumber, block, floor, allocatedDate, active]
+
+    CreateHostelAllocationBody:
+      type: object
+      properties:
+        studentId:
+          type: integer
+        roomId:
+          type: integer
+        allocatedDate:
+          type: string
+      required: [studentId, roomId, allocatedDate]
+
+    ExamResult:
+      type: object
+      properties:
+        id:
+          type: integer
+        studentId:
+          type: integer
+        studentName:
+          type: string
+        studentUid:
+          type: string
+        subject:
+          type: string
+        subjectCode:
+          type: string
+        semester:
+          type: string
+        academicYear:
+          type: string
+        internalMarks:
+          type: number
+        externalMarks:
+          type: number
+        totalMarks:
+          type: number
+        maxMarks:
+          type: number
+        grade:
+          type: string
+        result:
+          type: string
+          enum: [pass, fail, absent]
+        facultyId:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+      required: [id, studentId, studentName, studentUid, subject, subjectCode, semester, academicYear, internalMarks, externalMarks, totalMarks, maxMarks, grade, result, createdAt]
+
+    CreateExamResultBody:
+      type: object
+      properties:
+        studentId:
+          type: integer
+        subject:
+          type: string
+        subjectCode:
+          type: string
+        semester:
+          type: string
+        academicYear:
+          type: string
+        internalMarks:
+          type: number
+        externalMarks:
+          type: number
+        maxMarks:
+          type: number
+      required: [studentId, subject, subjectCode, semester, academicYear, internalMarks, externalMarks, maxMarks]
+
+    UpdateExamResultBody:
+      type: object
+      properties:
+        internalMarks:
+          type: number
+        externalMarks:
+          type: number
+        result:
+          type: string
+          enum: [pass, fail, absent]
+
+    Faculty:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        department:
+          type: string
+        designation:
+          type: string
+        subjects:
+          type: array
+          items:
+            type: string
+        joinedAt:
+          type: string
+      required: [id, name, email, phone, department, designation, subjects, joinedAt]
+
+    AdminDashboard:
+      type: object
+      properties:
+        totalStudents:
+          type: integer
+        pendingAdmissions:
+          type: integer
+        totalRevenue:
+          type: number
+        pendingFees:
+          type: number
+        hostelOccupancy:
+          type: integer
+        hostelCapacity:
+          type: integer
+        passRate:
+          type: number
+        recentAdmissions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Admission"
+        feeStatusBreakdown:
+          type: object
+          properties:
+            paid:
+              type: integer
+            pending:
+              type: integer
+            overdue:
+              type: integer
+          required: [paid, pending, overdue]
+        departmentStudentCounts:
+          type: array
+          items:
+            type: object
+            properties:
+              department:
+                type: string
+              count:
+                type: integer
+            required: [department, count]
+      required: [totalStudents, pendingAdmissions, totalRevenue, pendingFees, hostelOccupancy, hostelCapacity, passRate, recentAdmissions, feeStatusBreakdown, departmentStudentCounts]
+
+    StudentDashboard:
+      type: object
+      properties:
+        student:
+          $ref: "#/components/schemas/Student"
+        admission:
+          $ref: "#/components/schemas/Admission"
+          nullable: true
+        fees:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeeRecord"
+        hostelAllocation:
+          $ref: "#/components/schemas/HostelAllocation"
+          nullable: true
+        examResults:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExamResult"
+        cgpa:
+          type: number
+          nullable: true
+      required: [student, fees, examResults]
+
+    FacultyDashboard:
+      type: object
+      properties:
+        faculty:
+          $ref: "#/components/schemas/Faculty"
+        totalStudentsManaged:
+          type: integer
+        recentResults:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExamResult"
+        subjectPassRates:
+          type: array
+          items:
+            type: object
+            properties:
+              subject:
+                type: string
+              passRate:
+                type: number
+              totalStudents:
+                type: integer
+            required: [subject, passRate, totalStudents]
+      required: [faculty, totalStudentsManaged, recentResults, subjectPassRates]
