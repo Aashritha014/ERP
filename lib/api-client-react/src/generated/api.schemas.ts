@@ -94,6 +94,18 @@ export interface AdmissionCreatedResponse {
   credentials: TemporaryCredentials;
 }
 
+export interface StudentCredentials {
+  email: string;
+  password: string;
+  studentUid: string;
+  rollNumber: string;
+}
+
+export interface ApprovalResult {
+  admission: Admission;
+  studentCredentials: StudentCredentials | null;
+}
+
 export type CreateAdmissionBodyGender =
   (typeof CreateAdmissionBodyGender)[keyof typeof CreateAdmissionBodyGender];
 

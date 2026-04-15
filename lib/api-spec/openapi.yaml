@@ -174,7 +174,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Admission"
+                $ref: "#/components/schemas/ApprovalResult"
 
   /students:
     get:
@@ -625,6 +625,31 @@ components:
         credentials:
           $ref: "#/components/schemas/TemporaryCredentials"
       required: [admission, credentials]
+
+    StudentCredentials:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        studentUid:
+          type: string
+        rollNumber:
+          type: string
+      required: [email, password, studentUid, rollNumber]
+
+    ApprovalResult:
+      type: object
+      properties:
+        admission:
+          $ref: "#/components/schemas/Admission"
+        studentCredentials:
+          nullable: true
+          oneOf:
+            - $ref: "#/components/schemas/StudentCredentials"
+            - type: "null"
+      required: [admission, studentCredentials]
 
     Admission:
       type: object

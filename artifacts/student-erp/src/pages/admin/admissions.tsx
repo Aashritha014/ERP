@@ -1,18 +1,44 @@
 import { useState } from "react";
 import { Layout } from "@/components/layout";
-import { useListAdmissions, getListAdmissionsQueryKey, useUpdateAdmissionStatus, ListAdmissionsStatus } from "@workspace/api-client-react";
+import { useListAdmissions, getListAdmissionsQueryKey, useUpdateAdmissionStatus, ListAdmissionsStatus, StudentCredentials } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, X, Eye } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { Check, X, Eye, Copy, CheckCheck, GraduationCap, IdCard, Hash, Mail, Lock } from "lucide-react";
 import { toast } from "sonner";
+
+function CopyRow({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <div className="flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+      <div className="flex items-center gap-3 min-w-0">
+        <Icon className="h-4 w-4 text-slate-500 flex-shrink-0" />
+        <div className="min-w-0">
+          <p className="text-xs text-slate-500 uppercase tracking-wide font-medium">{label}</p>
+          <p className="text-sm font-mono font-semibold text-slate-900 truncate mt-0.5">{value}</p>
+        </div>
+      </div>
+      <button
+        onClick={handleCopy}
+        className="flex-shrink-0 p-1.5 rounded-md hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors"
+      >
+        {copied ? <CheckCheck className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
+      </button>
+    </div>
+  );
+}
 
 export default function AdminAdmissions() {
   const queryClient = useQueryClient();
@@ -22,6 +48,8 @@ export default function AdminAdmissions() {
   const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
   const [actionType, setActionType] = useState<"approve" | "reject" | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [approvedCredentials, setApprovedCredentials] = useState<StudentCredentials | null>(null);
+  const [isCredentialsDialogOpen, setIsCredentialsDialogOpen] = useState(false);
 
   const queryParams = statusFilter !== "all" ? { status: statusFilter } : {};
   
@@ -35,7 +63,7 @@ export default function AdminAdmissions() {
     if (!selectedAdmission || !actionType) return;
     
     try {
-      await updateMutation.mutateAsync({
+      const result = await updateMutation.mutateAsync({
         id: selectedAdmission.id,
         data: {
           status: actionType === "approve" ? "approved" : "rejected",
@@ -43,10 +71,16 @@ export default function AdminAdmissions() {
         }
       });
       
-      toast.success(`Application ${actionType === 'approve' ? 'approved' : 'rejected'} successfully`);
       queryClient.invalidateQueries({ queryKey: getListAdmissionsQueryKey() });
       setIsActionDialogOpen(false);
       setRemarks("");
+
+      if (actionType === "approve" && result.studentCredentials) {
+        setApprovedCredentials(result.studentCredentials);
+        setIsCredentialsDialogOpen(true);
+      } else {
+        toast.success("Application rejected successfully");
+      }
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Action failed");
     }
@@ -161,8 +195,8 @@ export default function AdminAdmissions() {
             <DialogHeader>
               <DialogTitle>{actionType === 'approve' ? 'Approve' : 'Reject'} Application #{selectedAdmission?.id}</DialogTitle>
               <DialogDescription>
-                You are about to {actionType} the application for {selectedAdmission?.name}.
-                {actionType === 'approve' && ' This will create a new Student record.'}
+                You are about to {actionType} the application for <strong>{selectedAdmission?.name}</strong>.
+                {actionType === 'approve' && ' A student account and login credentials will be generated automatically.'}
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
@@ -182,6 +216,53 @@ export default function AdminAdmissions() {
                 disabled={updateMutation.isPending}
               >
                 {updateMutation.isPending ? "Processing..." : `Confirm ${actionType}`}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Student Credentials Dialog (shown after approval) */}
+        <Dialog open={isCredentialsDialogOpen} onOpenChange={setIsCredentialsDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <div className="flex items-center gap-3 mb-1">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                  <GraduationCap className="h-5 w-5 text-green-700" />
+                </div>
+                <div>
+                  <DialogTitle className="text-green-800">Application Approved!</DialogTitle>
+                  <DialogDescription className="text-xs mt-0.5">Student account has been created</DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+
+            {approvedCredentials && (
+              <div className="space-y-4 py-2">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Share these login credentials with the student. The password is generated once and will not be shown again.
+                </p>
+
+                <div className="space-y-2">
+                  <CopyRow icon={IdCard} label="Student ID" value={approvedCredentials.studentUid} />
+                  <CopyRow icon={Hash} label="Roll Number" value={approvedCredentials.rollNumber} />
+                  <CopyRow icon={Mail} label="Email (Login)" value={approvedCredentials.email} />
+                  <CopyRow icon={Lock} label="Password" value={approvedCredentials.password} />
+                </div>
+
+                <Separator />
+
+                <div className="flex gap-2.5 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <span className="text-amber-500 text-base flex-shrink-0">⚠</span>
+                  <p className="text-xs text-amber-800 leading-relaxed">
+                    Copy and share these credentials with the student now. The password cannot be recovered later.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button onClick={() => setIsCredentialsDialogOpen(false)} className="w-full">
+                Done
               </Button>
             </DialogFooter>
           </DialogContent>

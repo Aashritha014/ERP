@@ -20,6 +20,7 @@ import type {
   AdminDashboard,
   Admission,
   AdmissionCreatedResponse,
+  ApprovalResult,
   CreateAdmissionBody,
   CreateExamResultBody,
   CreateFeeRecordBody,
@@ -642,8 +643,8 @@ export const updateAdmissionStatus = async (
   id: number,
   updateAdmissionStatusBody: UpdateAdmissionStatusBody,
   options?: RequestInit,
-): Promise<Admission> => {
-  return customFetch<Admission>(getUpdateAdmissionStatusUrl(id), {
+): Promise<ApprovalResult> => {
+  return customFetch<ApprovalResult>(getUpdateAdmissionStatusUrl(id), {
     ...options,
     method: "PATCH",
     headers: { "Content-Type": "application/json", ...options?.headers },

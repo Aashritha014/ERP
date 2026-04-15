@@ -135,24 +135,53 @@ router.patch("/admissions/:id", async (req, res): Promise<void> => {
         enrollmentYear: year,
         admissionId: admission.id,
       })
-      .onConflictDoNothing()
+      .onConflictDoUpdate({
+        target: studentsTable.admissionId,
+        set: { studentUid: uid, rollNumber: rollNo },
+      })
       .returning();
 
     if (student) {
-      await db
-        .insert(usersTable)
-        .values({
-          name: admission.name,
-          email: admission.email,
-          password: "student123",
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+      const studentPassword = Array.from({ length: 10 }, () =>
+        chars[Math.floor(Math.random() * chars.length)]
+      ).join("");
+
+      // Update the existing applicant user → student user; insert if somehow missing
+      const updated = await db
+        .update(usersTable)
+        .set({
           role: "student",
           studentId: student.id,
+          admissionId: null,
+          password: studentPassword,
         })
-        .onConflictDoNothing();
+        .where(eq(usersTable.email, admission.email))
+        .returning();
+
+      if (updated.length === 0) {
+        await db.insert(usersTable).values({
+          name: admission.name,
+          email: admission.email,
+          password: studentPassword,
+          role: "student",
+          studentId: student.id,
+        });
+      }
+
+      return res.json({
+        admission: formatAdmission(admission),
+        studentCredentials: {
+          email: admission.email,
+          password: studentPassword,
+          studentUid: uid,
+          rollNumber: rollNo,
+        },
+      });
     }
   }
 
-  res.json(formatAdmission(admission));
+  res.json({ admission: formatAdmission(admission), studentCredentials: null });
 });
 
 function formatAdmission(a: any) {

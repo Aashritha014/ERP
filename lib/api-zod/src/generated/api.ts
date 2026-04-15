@@ -135,21 +135,34 @@ export const UpdateAdmissionStatusBody = zod.object({
 });
 
 export const UpdateAdmissionStatusResponse = zod.object({
-  id: zod.number(),
-  name: zod.string(),
-  email: zod.string(),
-  phone: zod.string(),
-  dateOfBirth: zod.string(),
-  gender: zod.enum(["male", "female", "other"]),
-  address: zod.string(),
-  course: zod.string(),
-  department: zod.string(),
-  previousSchool: zod.string(),
-  previousMarks: zod.number(),
-  status: zod.enum(["pending", "approved", "rejected"]),
-  remarks: zod.string().nullish(),
-  createdAt: zod.string(),
-  updatedAt: zod.string(),
+  admission: zod.object({
+    id: zod.number(),
+    name: zod.string(),
+    email: zod.string(),
+    phone: zod.string(),
+    dateOfBirth: zod.string(),
+    gender: zod.enum(["male", "female", "other"]),
+    address: zod.string(),
+    course: zod.string(),
+    department: zod.string(),
+    previousSchool: zod.string(),
+    previousMarks: zod.number(),
+    status: zod.enum(["pending", "approved", "rejected"]),
+    remarks: zod.string().nullish(),
+    createdAt: zod.string(),
+    updatedAt: zod.string(),
+  }),
+  studentCredentials: zod
+    .union([
+      zod.object({
+        email: zod.string(),
+        password: zod.string(),
+        studentUid: zod.string(),
+        rollNumber: zod.string(),
+      }),
+      zod.null(),
+    ])
+    .nullable(),
 });
 
 /**
