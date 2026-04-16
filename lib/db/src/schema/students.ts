@@ -16,7 +16,7 @@ export const studentsTable = pgTable("students", {
   semester: text("semester").notNull(),
   rollNumber: text("roll_number").notNull().unique(),
   enrollmentYear: integer("enrollment_year").notNull(),
-  admissionId: integer("admission_id"),
+  admissionId: integer("admission_id").unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
