@@ -16,6 +16,9 @@ export const admissionsTable = pgTable("admissions", {
   previousMarks: real("previous_marks").notNull(),
   status: text("status").notNull().default("pending"),
   remarks: text("remarks"),
+  studentUid: text("student_uid"),
+  rollNumber: text("roll_number"),
+  studentPassword: text("student_password"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

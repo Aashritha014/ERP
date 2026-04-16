@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useGetAdmission, useLogout } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
@@ -20,6 +21,12 @@ import {
   MapPin,
   School,
   BarChart2,
+  Copy,
+  Check,
+  Lock,
+  IdCard,
+  Hash,
+  LogIn,
 } from "lucide-react";
 
 function StatusBadge({ status }: { status: string }) {
@@ -61,6 +68,33 @@ function InfoItem({ icon: Icon, label, value }: { icon: any; label: string; valu
   );
 }
 
+function CredentialRow({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <div className="flex items-center justify-between gap-3 p-3 bg-white rounded-lg border border-green-200">
+      <div className="flex items-center gap-3 min-w-0">
+        <Icon className="h-4 w-4 text-green-700 flex-shrink-0" />
+        <div className="min-w-0">
+          <p className="text-xs text-slate-500 uppercase tracking-wide font-medium">{label}</p>
+          <p className="text-sm font-mono font-semibold text-slate-900 truncate mt-0.5">{value}</p>
+        </div>
+      </div>
+      <button
+        onClick={handleCopy}
+        className="flex-shrink-0 p-1.5 rounded-md hover:bg-green-100 text-slate-400 hover:text-green-700 transition-colors"
+        title="Copy"
+      >
+        {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
+      </button>
+    </div>
+  );
+}
+
 export default function ApplicantStatus() {
   const { user, logoutClient } = useAuth();
   const [, setLocation] = useLocation();
@@ -76,34 +110,6 @@ export default function ApplicantStatus() {
     await logoutMutation.mutateAsync();
     logoutClient();
   };
-
-  const statusMessages: Record<string, { title: string; description: string; icon: any; colorClass: string }> = {
-    pending: {
-      title: "Your application is being reviewed",
-      description:
-        "Our admissions team is carefully reviewing your application. This process typically takes 5–10 business days. You will be notified of any updates.",
-      icon: Clock,
-      colorClass: "text-amber-600 bg-amber-50 border-amber-200",
-    },
-    approved: {
-      title: "Congratulations! Your application has been approved",
-      description:
-        "Welcome to EduCore University! Your student account has been created. Please log out and log back in with your new student credentials to access your full student portal.",
-      icon: CheckCircle2,
-      colorClass: "text-green-700 bg-green-50 border-green-200",
-    },
-    rejected: {
-      title: "Your application was not successful",
-      description:
-        admission?.remarks
-          ? `Reason: ${admission.remarks}. You may contact the admissions office for further information or reapply next cycle.`
-          : "Unfortunately, your application did not meet the admission criteria. Please contact the admissions office for more information.",
-      icon: XCircle,
-      colorClass: "text-red-700 bg-red-50 border-red-200",
-    },
-  };
-
-  const statusInfo = admission ? statusMessages[admission.status] ?? statusMessages.pending : null;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -151,25 +157,112 @@ export default function ApplicantStatus() {
         {!isLoading && !admissionId && (
           <Card className="border-amber-200 bg-amber-50">
             <CardContent className="pt-6">
-              <p className="text-sm text-amber-800">No admission application found linked to your account. Please contact the admissions office.</p>
+              <p className="text-sm text-amber-800">
+                No admission application found linked to your account. Please contact the admissions office.
+              </p>
             </CardContent>
           </Card>
         )}
 
-        {!isLoading && admission && statusInfo && (
+        {!isLoading && admission && (
           <>
-            {/* Status Card */}
-            <Card className={`border ${statusInfo.colorClass.split(" ").slice(-1)[0]}`}>
-              <CardContent className="pt-6">
-                <div className={`flex items-start gap-4 p-4 rounded-lg border ${statusInfo.colorClass}`}>
-                  <statusInfo.icon className="h-6 w-6 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-sm">{statusInfo.title}</p>
-                    <p className="text-sm mt-1 leading-relaxed opacity-90">{statusInfo.description}</p>
+            {/* ── APPROVED ── */}
+            {admission.status === "approved" && (
+              <Card className="border-green-200 overflow-hidden">
+                {/* Green header bar */}
+                <div className="bg-green-600 px-6 py-5">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+                      <CheckCircle2 className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-white text-base">
+                        Congratulations! Your application is approved.
+                      </p>
+                      <p className="text-green-100 text-xs mt-0.5">
+                        Your student account has been created. Use the credentials below to log in.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+
+                <CardContent className="pt-5 pb-6 space-y-4">
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800 mb-1">Your Official Login Details</p>
+                    <p className="text-xs text-slate-500 mb-3">
+                      Save these credentials — the password will not be shown again after you log out.
+                    </p>
+                    <div className="space-y-2">
+                      {admission.studentUid && (
+                        <CredentialRow icon={IdCard} label="Student ID" value={admission.studentUid} />
+                      )}
+                      {admission.rollNumber && (
+                        <CredentialRow icon={Hash} label="Roll Number" value={admission.rollNumber} />
+                      )}
+                      <CredentialRow icon={Mail} label="Email (Login)" value={admission.email} />
+                      {admission.studentPassword && (
+                        <CredentialRow icon={Lock} label="Password" value={admission.studentPassword} />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2.5 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <span className="text-amber-500 text-base flex-shrink-0">⚠</span>
+                    <p className="text-xs text-amber-800 leading-relaxed">
+                      Copy your password before signing out. Once you log out, your account is upgraded to a
+                      full student account and this page will no longer be accessible.
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={handleLogout}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                    size="lg"
+                  >
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Sign out &amp; Log in as Student
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* ── REJECTED ── */}
+            {admission.status === "rejected" && (
+              <Card className="border-red-200 bg-red-50">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <XCircle className="h-6 w-6 text-red-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-red-800">Your application was not successful</p>
+                      <p className="text-sm text-red-700 mt-1 leading-relaxed">
+                        {admission.remarks
+                          ? `Reason: ${admission.remarks}`
+                          : "Your application did not meet the admission criteria."}
+                        {" "}Please contact the admissions office for more information.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* ── PENDING ── */}
+            {admission.status === "pending" && (
+              <Card className="border-amber-200 bg-amber-50">
+                <CardContent className="pt-6">
+                  <div className="flex items-start gap-3">
+                    <Clock className="h-6 w-6 text-amber-600 flex-shrink-0 mt-0.5 animate-pulse" />
+                    <div>
+                      <p className="font-semibold text-amber-800">Your application is being reviewed</p>
+                      <p className="text-sm text-amber-700 mt-1 leading-relaxed">
+                        Our admissions team is carefully reviewing your application. This typically takes
+                        5–10 business days. Check back here for updates.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Application Summary */}
             <Card>
@@ -184,13 +277,19 @@ export default function ApplicantStatus() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Personal Information</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                    Personal Information
+                  </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <InfoItem icon={User} label="Full Name" value={admission.name} />
                     <InfoItem icon={Mail} label="Email Address" value={admission.email} />
                     <InfoItem icon={Phone} label="Phone" value={admission.phone} />
                     <InfoItem icon={Calendar} label="Date of Birth" value={admission.dateOfBirth} />
-                    <InfoItem icon={User} label="Gender" value={admission.gender.charAt(0).toUpperCase() + admission.gender.slice(1)} />
+                    <InfoItem
+                      icon={User}
+                      label="Gender"
+                      value={admission.gender.charAt(0).toUpperCase() + admission.gender.slice(1)}
+                    />
                   </div>
                   <div className="mt-4">
                     <InfoItem icon={MapPin} label="Address" value={admission.address} />
@@ -200,7 +299,9 @@ export default function ApplicantStatus() {
                 <Separator />
 
                 <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Academic Details</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                    Academic Details
+                  </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <InfoItem icon={BookOpen} label="Course Applied For" value={admission.course} />
                     <InfoItem icon={GraduationCap} label="Department" value={admission.department} />
@@ -212,7 +313,9 @@ export default function ApplicantStatus() {
                 <Separator />
 
                 <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Timeline</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                    Timeline
+                  </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <InfoItem
                       icon={Calendar}
@@ -239,7 +342,9 @@ export default function ApplicantStatus() {
                   <>
                     <Separator />
                     <div>
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Remarks from Admissions</p>
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+                        Remarks from Admissions
+                      </p>
                       <p className="text-sm text-foreground bg-muted/50 rounded-lg px-4 py-3 border">
                         {admission.remarks}
                       </p>

@@ -683,6 +683,15 @@ components:
         remarks:
           type: string
           nullable: true
+        studentUid:
+          type: string
+          nullable: true
+        rollNumber:
+          type: string
+          nullable: true
+        studentPassword:
+          type: string
+          nullable: true
         createdAt:
           type: string
         updatedAt:

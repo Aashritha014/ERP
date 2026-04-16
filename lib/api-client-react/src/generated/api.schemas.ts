@@ -85,6 +85,9 @@ export interface Admission {
   previousMarks: number;
   status: AdmissionStatus;
   remarks?: string | null;
+  studentUid?: string | null;
+  rollNumber?: string | null;
+  studentPassword?: string | null;
   createdAt: string;
   updatedAt: string;
 }

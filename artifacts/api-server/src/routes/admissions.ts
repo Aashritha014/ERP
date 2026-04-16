@@ -169,8 +169,15 @@ router.patch("/admissions/:id", async (req, res): Promise<void> => {
         });
       }
 
+      // Persist credentials into the admission record so the applicant portal can display them
+      const [updatedAdmission] = await db
+        .update(admissionsTable)
+        .set({ studentUid: uid, rollNumber: rollNo, studentPassword })
+        .where(eq(admissionsTable.id, admission.id))
+        .returning();
+
       return res.json({
-        admission: formatAdmission(admission),
+        admission: formatAdmission(updatedAdmission),
         studentCredentials: {
           email: admission.email,
           password: studentPassword,
@@ -199,6 +206,9 @@ function formatAdmission(a: any) {
     previousMarks: a.previousMarks,
     status: a.status,
     remarks: a.remarks ?? null,
+    studentUid: a.studentUid ?? null,
+    rollNumber: a.rollNumber ?? null,
+    studentPassword: a.studentPassword ?? null,
     createdAt: a.createdAt instanceof Date ? a.createdAt.toISOString() : a.createdAt,
     updatedAt: a.updatedAt instanceof Date ? a.updatedAt.toISOString() : a.updatedAt,
   };
