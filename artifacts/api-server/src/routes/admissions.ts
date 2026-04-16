@@ -118,12 +118,20 @@ router.patch("/admissions/:id", async (req, res): Promise<void> => {
     const uid = `STU${year}${String(admission.id).padStart(4, "0")}`;
     const rollNo = `${admission.department.substring(0, 3).toUpperCase()}${year}${String(admission.id).padStart(3, "0")}`;
 
+    // Generate official @erp.edu email from applicant name
+    const nameParts = admission.name.toLowerCase().trim().split(/\s+/);
+    const first = nameParts[0].replace(/[^a-z]/g, "");
+    const last = (nameParts.length > 1 ? nameParts[nameParts.length - 1] : "").replace(/[^a-z]/g, "");
+    const officialEmail = last
+      ? `${first}.${last}${admission.id}@erp.edu`
+      : `${first}${admission.id}@erp.edu`;
+
     const [student] = await db
       .insert(studentsTable)
       .values({
         studentUid: uid,
         name: admission.name,
-        email: admission.email,
+        email: officialEmail,
         phone: admission.phone,
         dateOfBirth: admission.dateOfBirth,
         gender: admission.gender,
@@ -137,7 +145,7 @@ router.patch("/admissions/:id", async (req, res): Promise<void> => {
       })
       .onConflictDoUpdate({
         target: studentsTable.admissionId,
-        set: { studentUid: uid, rollNumber: rollNo },
+        set: { studentUid: uid, rollNumber: rollNo, email: officialEmail },
       })
       .returning();
 
@@ -147,39 +155,34 @@ router.patch("/admissions/:id", async (req, res): Promise<void> => {
         chars[Math.floor(Math.random() * chars.length)]
       ).join("");
 
-      // Update the existing applicant user → student user; insert if somehow missing
-      const updated = await db
-        .update(usersTable)
-        .set({
-          role: "student",
-          studentId: student.id,
-          admissionId: null,
-          password: studentPassword,
-        })
-        .where(eq(usersTable.email, admission.email))
-        .returning();
-
-      if (updated.length === 0) {
-        await db.insert(usersTable).values({
+      // Create a fresh student user account with the official @erp.edu email.
+      // The applicant account (personal email) is left untouched so the
+      // student can still log in and view their credentials on the status page.
+      await db
+        .insert(usersTable)
+        .values({
           name: admission.name,
-          email: admission.email,
+          email: officialEmail,
           password: studentPassword,
           role: "student",
           studentId: student.id,
+        })
+        .onConflictDoUpdate({
+          target: usersTable.email,
+          set: { role: "student", studentId: student.id, password: studentPassword },
         });
-      }
 
-      // Persist credentials into the admission record so the applicant portal can display them
+      // Persist credentials into the admission record so the applicant portal can show them
       const [updatedAdmission] = await db
         .update(admissionsTable)
-        .set({ studentUid: uid, rollNumber: rollNo, studentPassword })
+        .set({ studentUid: uid, rollNumber: rollNo, studentPassword, officialEmail })
         .where(eq(admissionsTable.id, admission.id))
         .returning();
 
       return res.json({
         admission: formatAdmission(updatedAdmission),
         studentCredentials: {
-          email: admission.email,
+          officialEmail,
           password: studentPassword,
           studentUid: uid,
           rollNumber: rollNo,
@@ -209,6 +212,7 @@ function formatAdmission(a: any) {
     studentUid: a.studentUid ?? null,
     rollNumber: a.rollNumber ?? null,
     studentPassword: a.studentPassword ?? null,
+    officialEmail: a.officialEmail ?? null,
     createdAt: a.createdAt instanceof Date ? a.createdAt.toISOString() : a.createdAt,
     updatedAt: a.updatedAt instanceof Date ? a.updatedAt.toISOString() : a.updatedAt,
   };

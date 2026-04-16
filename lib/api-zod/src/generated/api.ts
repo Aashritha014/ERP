@@ -79,6 +79,7 @@ export const ListAdmissionsResponseItem = zod.object({
   studentUid: zod.string().nullish(),
   rollNumber: zod.string().nullish(),
   studentPassword: zod.string().nullish(),
+  officialEmail: zod.string().nullish(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });
@@ -124,6 +125,7 @@ export const GetAdmissionResponse = zod.object({
   studentUid: zod.string().nullish(),
   rollNumber: zod.string().nullish(),
   studentPassword: zod.string().nullish(),
+  officialEmail: zod.string().nullish(),
   createdAt: zod.string(),
   updatedAt: zod.string(),
 });
@@ -158,13 +160,14 @@ export const UpdateAdmissionStatusResponse = zod.object({
     studentUid: zod.string().nullish(),
     rollNumber: zod.string().nullish(),
     studentPassword: zod.string().nullish(),
+    officialEmail: zod.string().nullish(),
     createdAt: zod.string(),
     updatedAt: zod.string(),
   }),
   studentCredentials: zod
     .union([
       zod.object({
-        email: zod.string(),
+        officialEmail: zod.string(),
         password: zod.string(),
         studentUid: zod.string(),
         rollNumber: zod.string(),
@@ -529,6 +532,7 @@ export const GetAdminDashboardResponse = zod.object({
       studentUid: zod.string().nullish(),
       rollNumber: zod.string().nullish(),
       studentPassword: zod.string().nullish(),
+      officialEmail: zod.string().nullish(),
       createdAt: zod.string(),
       updatedAt: zod.string(),
     }),
@@ -589,6 +593,7 @@ export const GetStudentDashboardResponse = zod.object({
       studentUid: zod.string().nullish(),
       rollNumber: zod.string().nullish(),
       studentPassword: zod.string().nullish(),
+      officialEmail: zod.string().nullish(),
       createdAt: zod.string(),
       updatedAt: zod.string(),
     })

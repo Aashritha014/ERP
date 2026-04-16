@@ -19,6 +19,7 @@ export const admissionsTable = pgTable("admissions", {
   studentUid: text("student_uid"),
   rollNumber: text("roll_number"),
   studentPassword: text("student_password"),
+  officialEmail: text("official_email"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

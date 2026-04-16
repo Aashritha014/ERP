@@ -25,6 +25,7 @@ export interface Admission {
   studentUid?: string | null;
   rollNumber?: string | null;
   studentPassword?: string | null;
+  officialEmail?: string | null;
   createdAt: string;
   updatedAt: string;
 }

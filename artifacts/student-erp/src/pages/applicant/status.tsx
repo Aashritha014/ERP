@@ -180,13 +180,28 @@ export default function ApplicantStatus() {
                         Congratulations! Your application is approved.
                       </p>
                       <p className="text-green-100 text-xs mt-0.5">
-                        Your student account has been created. Use the credentials below to log in.
+                        Your official university account has been created. Use the details below to log in.
                       </p>
                     </div>
                   </div>
                 </div>
 
                 <CardContent className="pt-5 pb-6 space-y-4">
+                  {/* Official email highlight */}
+                  {admission.officialEmail && (
+                    <div className="rounded-lg border border-green-300 bg-green-50 px-4 py-3">
+                      <p className="text-xs font-semibold text-green-800 uppercase tracking-wide mb-0.5">
+                        Your Official University Email
+                      </p>
+                      <p className="text-base font-bold text-green-900 font-mono">
+                        {admission.officialEmail}
+                      </p>
+                      <p className="text-xs text-green-700 mt-1">
+                        This replaces your personal email for all university logins going forward.
+                      </p>
+                    </div>
+                  )}
+
                   <div>
                     <p className="text-sm font-semibold text-slate-800 mb-1">Your Official Login Details</p>
                     <p className="text-xs text-slate-500 mb-3">
@@ -199,7 +214,9 @@ export default function ApplicantStatus() {
                       {admission.rollNumber && (
                         <CredentialRow icon={Hash} label="Roll Number" value={admission.rollNumber} />
                       )}
-                      <CredentialRow icon={Mail} label="Email (Login)" value={admission.email} />
+                      {admission.officialEmail && (
+                        <CredentialRow icon={Mail} label="Official Email (Login)" value={admission.officialEmail} />
+                      )}
                       {admission.studentPassword && (
                         <CredentialRow icon={Lock} label="Password" value={admission.studentPassword} />
                       )}
@@ -209,8 +226,8 @@ export default function ApplicantStatus() {
                   <div className="flex gap-2.5 p-3 bg-amber-50 border border-amber-200 rounded-lg">
                     <span className="text-amber-500 text-base flex-shrink-0">⚠</span>
                     <p className="text-xs text-amber-800 leading-relaxed">
-                      Copy your password before signing out. Once you log out, your account is upgraded to a
-                      full student account and this page will no longer be accessible.
+                      Copy your credentials before signing out. Log back in with your new
+                      official email (<strong>{admission.officialEmail}</strong>) and the password above to access your student portal.
                     </p>
                   </div>
 

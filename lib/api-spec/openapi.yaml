@@ -629,7 +629,7 @@ components:
     StudentCredentials:
       type: object
       properties:
-        email:
+        officialEmail:
           type: string
         password:
           type: string
@@ -637,7 +637,7 @@ components:
           type: string
         rollNumber:
           type: string
-      required: [email, password, studentUid, rollNumber]
+      required: [officialEmail, password, studentUid, rollNumber]
 
     ApprovalResult:
       type: object
@@ -690,6 +690,9 @@ components:
           type: string
           nullable: true
         studentPassword:
+          type: string
+          nullable: true
+        officialEmail:
           type: string
           nullable: true
         createdAt:

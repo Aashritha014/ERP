@@ -7,7 +7,7 @@
  */
 
 export interface StudentCredentials {
-  email: string;
+  officialEmail: string;
   password: string;
   studentUid: string;
   rollNumber: string;

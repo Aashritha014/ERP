@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Check, X, Eye, Copy, CheckCheck, GraduationCap, IdCard, Hash, Mail, Lock } from "lucide-react";
+import { Check, X, Eye, Copy, CheckCheck, GraduationCap, IdCard, Hash, Mail, Lock, AtSign } from "lucide-react";
 import { toast } from "sonner";
 
 function CopyRow({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
@@ -242,10 +242,23 @@ export default function AdminAdmissions() {
                   Share these login credentials with the student. The password is generated once and will not be shown again.
                 </p>
 
+                {/* Official email highlight */}
+                <div className="rounded-lg border border-green-300 bg-green-50 px-4 py-3">
+                  <p className="text-xs font-semibold text-green-800 uppercase tracking-wide mb-0.5">
+                    Official University Email
+                  </p>
+                  <p className="text-base font-bold text-green-900 font-mono">
+                    {approvedCredentials.officialEmail}
+                  </p>
+                  <p className="text-xs text-green-700 mt-1">
+                    Auto-generated from the student's name. Share this as their new login email.
+                  </p>
+                </div>
+
                 <div className="space-y-2">
                   <CopyRow icon={IdCard} label="Student ID" value={approvedCredentials.studentUid} />
                   <CopyRow icon={Hash} label="Roll Number" value={approvedCredentials.rollNumber} />
-                  <CopyRow icon={Mail} label="Email (Login)" value={approvedCredentials.email} />
+                  <CopyRow icon={AtSign} label="Official Email (Login)" value={approvedCredentials.officialEmail} />
                   <CopyRow icon={Lock} label="Password" value={approvedCredentials.password} />
                 </div>
 

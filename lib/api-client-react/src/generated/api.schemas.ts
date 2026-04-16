@@ -88,6 +88,7 @@ export interface Admission {
   studentUid?: string | null;
   rollNumber?: string | null;
   studentPassword?: string | null;
+  officialEmail?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -98,7 +99,7 @@ export interface AdmissionCreatedResponse {
 }
 
 export interface StudentCredentials {
-  email: string;
+  officialEmail: string;
   password: string;
   studentUid: string;
   rollNumber: string;
