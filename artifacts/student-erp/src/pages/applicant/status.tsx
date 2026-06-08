@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { useGetAdmission, useLogout } from "@workspace/api-client-react";
+import { useGetAdmission, getGetAdmissionQueryKey, useLogout } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -103,7 +103,7 @@ export default function ApplicantStatus() {
   const admissionId = user?.admissionId ?? null;
 
   const { data: admission, isLoading } = useGetAdmission(admissionId!, {
-    query: { enabled: !!admissionId },
+    query: { enabled: !!admissionId, queryKey: getGetAdmissionQueryKey(admissionId!) },
   });
 
   const handleLogout = async () => {

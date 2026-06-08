@@ -1,8 +1,9 @@
 import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { AuthProvider, ProtectedRoute } from "@/hooks/use-auth";
+import { AuthProvider } from "@/contexts/auth-context";
+import { ProtectedRoute } from "@/components/protected-route";
 import NotFound from "@/pages/not-found";
 
 // Public Pages
@@ -12,6 +13,7 @@ import ApplicantStatus from "@/pages/applicant/status";
 
 // Student Pages
 import StudentDashboard from "@/pages/student/dashboard";
+import StudentProfile from "@/pages/student/profile";
 import StudentAdmission from "@/pages/student/admission";
 import StudentFees from "@/pages/student/fees";
 import StudentFeeDetail from "@/pages/student/fee-detail";
@@ -46,61 +48,64 @@ function Router() {
 
       {/* Applicant Routes */}
       <Route path="/applicant/status">
-        <ProtectedRoute allowedRoles={['applicant']}><ApplicantStatus /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["applicant"]}><ApplicantStatus /></ProtectedRoute>
       </Route>
 
       {/* Student Routes */}
       <Route path="/student/dashboard">
-        <ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["student"]}><StudentDashboard /></ProtectedRoute>
+      </Route>
+      <Route path="/student/profile">
+        <ProtectedRoute allowedRoles={["student"]}><StudentProfile /></ProtectedRoute>
       </Route>
       <Route path="/student/admission">
-        <ProtectedRoute allowedRoles={['student']}><StudentAdmission /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["student"]}><StudentAdmission /></ProtectedRoute>
       </Route>
       <Route path="/student/fees">
-        <ProtectedRoute allowedRoles={['student']}><StudentFees /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["student"]}><StudentFees /></ProtectedRoute>
       </Route>
       <Route path="/student/fees/:id">
-        <ProtectedRoute allowedRoles={['student']}><StudentFeeDetail /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["student"]}><StudentFeeDetail /></ProtectedRoute>
       </Route>
       <Route path="/student/hostel">
-        <ProtectedRoute allowedRoles={['student']}><StudentHostel /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["student"]}><StudentHostel /></ProtectedRoute>
       </Route>
       <Route path="/student/exams">
-        <ProtectedRoute allowedRoles={['student']}><StudentExams /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["student"]}><StudentExams /></ProtectedRoute>
       </Route>
 
       {/* Admin Routes */}
       <Route path="/admin/dashboard">
-        <ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["admin"]}><AdminDashboard /></ProtectedRoute>
       </Route>
       <Route path="/admin/admissions">
-        <ProtectedRoute allowedRoles={['admin']}><AdminAdmissions /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["admin"]}><AdminAdmissions /></ProtectedRoute>
       </Route>
       <Route path="/admin/students">
-        <ProtectedRoute allowedRoles={['admin']}><AdminStudents /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["admin"]}><AdminStudents /></ProtectedRoute>
       </Route>
       <Route path="/admin/students/:id">
-        <ProtectedRoute allowedRoles={['admin']}><AdminStudentDetail /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["admin"]}><AdminStudentDetail /></ProtectedRoute>
       </Route>
       <Route path="/admin/fees">
-        <ProtectedRoute allowedRoles={['admin']}><AdminFees /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["admin"]}><AdminFees /></ProtectedRoute>
       </Route>
       <Route path="/admin/hostel">
-        <ProtectedRoute allowedRoles={['admin']}><AdminHostel /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["admin"]}><AdminHostel /></ProtectedRoute>
       </Route>
       <Route path="/admin/exams">
-        <ProtectedRoute allowedRoles={['admin']}><AdminExams /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["admin"]}><AdminExams /></ProtectedRoute>
       </Route>
 
       {/* Faculty Routes */}
       <Route path="/faculty/dashboard">
-        <ProtectedRoute allowedRoles={['faculty']}><FacultyDashboard /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["faculty"]}><FacultyDashboard /></ProtectedRoute>
       </Route>
       <Route path="/faculty/students">
-        <ProtectedRoute allowedRoles={['faculty']}><FacultyStudents /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["faculty"]}><FacultyStudents /></ProtectedRoute>
       </Route>
       <Route path="/faculty/results">
-        <ProtectedRoute allowedRoles={['faculty']}><FacultyResults /></ProtectedRoute>
+        <ProtectedRoute allowedRoles={["faculty"]}><FacultyResults /></ProtectedRoute>
       </Route>
 
       <Route component={NotFound} />
